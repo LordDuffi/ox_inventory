@@ -27,13 +27,12 @@ end
 local Shops = require 'modules.shops.client'
 local Utils = require 'modules.utils.client'
 local Weapon = require 'modules.weapon.client'
-local Items = require 'modules.items.client'
 
 function client.onLogout()
 	if not PlayerData.loaded then return end
 
 	if client.parachute then
-		Utils.DeleteEntity(client.parachute[1])
+		Utils.DeleteEntity(client.parachute)
 		client.parachute = false
 	end
 
@@ -45,28 +44,29 @@ function client.onLogout()
 		point:remove()
 	end
 
-    for _, v in pairs(Items --[[@as table]]) do
-        v.count = 0
-    end
-
 	PlayerData.loaded = false
 	client.drops = nil
 
 	client.closeInventory()
 	Shops.wipeShops()
-
-    if client.interval then
-        ClearInterval(client.interval)
-        ClearInterval(client.tick)
-    end
-
+	ClearInterval(client.interval)
+	ClearInterval(client.tick)
 	Weapon.Disarm()
 end
 
-local success, result = pcall(lib.load, ('modules.bridge.%s.client'):format(shared.framework))
+local scriptPath = ('modules/bridge/%s/client.lua'):format(shared.framework)
+local resourceFile = LoadResourceFile(cache.resource, scriptPath)
 
-if not success then
-    lib.print.error(result)
-    lib = nil
-    return
+if not resourceFile then
+	lib = nil
+	return error(("Unable to find framework bridge for '%s'"):format(shared.framework))
 end
+
+local func, err = load(resourceFile, ('@@%s/%s'):format(cache.resource, scriptPath))
+
+if not func or err then
+	lib = nil
+	return error(err)
+end
+
+func(client.onLogout)

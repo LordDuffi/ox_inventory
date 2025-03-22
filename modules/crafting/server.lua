@@ -43,7 +43,7 @@ local function createCraftingBench(id, data)
 	end
 end
 
-for id, data in pairs(lib.load('data.crafting') or {}) do createCraftingBench(data.name or id, data) end
+for id, data in pairs(data('crafting')) do createCraftingBench(id, data) end
 
 ---falls back to player coords if zones and points are both nil
 ---@param source number
@@ -112,36 +112,13 @@ lib.callback.register('ox_inventory:craftItem', function(source, id, index, reci
 			end
 
 			local craftedItem = Items(recipe.name)
-			local craftCount = (type(recipe.count) == 'number' and recipe.count) or (table.type(recipe.count) == 'array' and math.random(recipe.count[1], recipe.count[2])) or 1
-
-			-- Modified weight calculation
-			local newWeight = left.weight
-			local items = Inventory.Search(left, 'slots', tbl) or {}
+			local newWeight = left.weight + (craftedItem.weight + (recipe.metadata?.weight or 0)) * (recipe.count or 1)
 			---@todo new iterator or something to accept a map
-			-- First subtract weight of ingredients that will be removed
-			for name, needs in pairs(recipe.ingredients) do
-				if needs > 0 then
-					local item = Items(name)
-					if item then
-						newWeight -= (item.weight * needs)
-					end
-				end
-			end
-
-			-- Add weight of crafted item
-			newWeight += (craftedItem.weight + (recipe.metadata?.weight or 0)) * craftCount
-
-			if newWeight > left.maxWeight then return false, 'cannot_carry' end
-
 			local items = Inventory.Search(left, 'slots', tbl) or {}
 			table.wipe(tbl)
 
 			for name, needs in pairs(recipe.ingredients) do
-				if needs == 0 then break end
-
 				local slots = items[name] or items
-
-                if #slots == 0 then return end
 
 				for i = 1, #slots do
 					local slot = slots[i]
@@ -169,10 +146,13 @@ lib.callback.register('ox_inventory:craftItem', function(source, id, index, reci
 							end
 						end
 					elseif needs <= slot.count then
+						local itemWeight = slot.weight / slot.count
+						newWeight = (newWeight - slot.weight) + (slot.count - needs) * itemWeight
 						tbl[slot.slot] = needs
 						break
 					else
 						tbl[slot.slot] = slot.count
+						newWeight -= slot.weight
 						needs -= slot.count
 					end
 
@@ -180,6 +160,10 @@ lib.callback.register('ox_inventory:craftItem', function(source, id, index, reci
 					-- Player does not have enough items (ui should prevent crafting if lacking items, so this shouldn't trigger)
 					if needs > 0 and i == #slots then return end
 				end
+			end
+
+			if newWeight > left.maxWeight then
+				return false, 'cannot_carry'
 			end
 
 			if not TriggerEventHooks('craftItem', {
@@ -195,7 +179,7 @@ lib.callback.register('ox_inventory:craftItem', function(source, id, index, reci
 
 			if success then
 				for name, needs in pairs(recipe.ingredients) do
-					if Inventory.GetItemCount(left, name) < needs then return end
+					if Inventory.GetItem(left, name, nil, true) < needs then return end
 				end
 
 				for slot, count in pairs(tbl) do
@@ -221,22 +205,27 @@ lib.callback.register('ox_inventory:craftItem', function(source, id, index, reci
 								local newItem = Inventory.SetSlot(left, item, 1, table.deepclone(invSlot.metadata), emptySlot)
 
 								if newItem then
-                                    Items.UpdateDurability(left, newItem, item, durability < 0 and 0 or durability)
+									newItem.metadata.durability = durability < 0 and 0 or durability
+									durability = 0
+
+									left:syncSlotsWithPlayer({
+										{
+											item = newItem,
+										}
+									}, left.weight)
 								end
 							end
 
 							invSlot.count -= 1
-                            invSlot.weight = Inventory.SlotWeight(item, invSlot)
-
-							left:syncSlotsWithClients({
-								{
-									item = invSlot,
-									inventory = left.id
-								}
-							}, true)
 						else
-                            Items.UpdateDurability(left, invSlot, item, durability < 0 and 0 or durability)
+							invSlot.metadata.durability = durability < 0 and 0 or durability
 						end
+
+						left:syncSlotsWithPlayer({
+							{
+								item = invSlot,
+							}
+						}, left.weight)
 					else
 						local removed = invSlot and Inventory.RemoveItem(left, invSlot.name, count, nil, slot)
 						-- Failed to remove item (inventory state unexpectedly changed?)
@@ -244,7 +233,7 @@ lib.callback.register('ox_inventory:craftItem', function(source, id, index, reci
 					end
 				end
 
-				Inventory.AddItem(left, craftedItem, craftCount, recipe.metadata or {}, craftedItem.stack and toSlot or nil)
+				Inventory.AddItem(left, craftedItem, recipe.count or 1, recipe.metadata or {}, craftedItem.stack and toSlot or nil)
 			end
 
 			return success

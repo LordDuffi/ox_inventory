@@ -10,29 +10,32 @@ Items.containers = require 'modules.items.containers'
 
 -- Possible metadata when creating garbage
 local trash = {
-	{description = 'A discarded burger carton.', weight = 50, image = 'trash_burger'},
+	{description = 'An old rolled up newspaper.', weight = 200, image = 'trash_newspaper'},
+	{description = 'A discarded burger shot carton.', weight = 50, image = 'trash_burgershot'},
 	{description = 'An empty soda can.', weight = 20, image = 'trash_can'},
 	{description = 'A mouldy piece of bread.', weight = 70, image = 'trash_bread'},
-	{description = 'An empty chips bag.', weight = 5, image = 'trash_chips'},
+	{description = 'An empty ciggarette carton.', weight = 10, image = 'trash_fags'},
 	{description = 'A slightly used pair of panties.', weight = 20, image = 'panties'},
-	{description = 'An old rolled up newspaper.', weight = 200, image = 'WEAPON_ACIDPACKAGE'},
+	{description = 'An empty coffee cup.', weight = 20, image = 'trash_coffee'},
+	{description = 'A crumpled up piece of paper.', weight = 5, image = 'trash_paper'},
+	{description = 'An empty chips bag.', weight = 5, image = 'trash_chips'},
 }
 
 ---@param _ table?
 ---@param name string?
 ---@return table?
 local function getItem(_, name)
-    if not name then return ItemList end
+	if name then
+		name = name:lower()
 
-	if type(name) ~= 'string' then return end
+		if name:sub(0, 7) == 'weapon_' then
+			name = name:upper()
+		end
 
-    name = name:lower()
+		return ItemList[name]
+	end
 
-    if name:sub(0, 7) == 'weapon_' then
-        name = name:upper()
-    end
-
-    return ItemList[name]
+	return ItemList
 end
 
 setmetatable(Items --[[@as table]], {
@@ -50,8 +53,6 @@ local Inventory
 
 CreateThread(function()
 	Inventory = require 'modules.inventory.server'
-
-    if not lib then return end
 
 	if shared.framework == 'esx' then
 		local success, items = pcall(MySQL.query.await, 'SELECT * FROM items')
@@ -113,6 +114,115 @@ CreateThread(function()
 		end
 
 		Wait(500)
+
+	elseif shared.framework == 'qb' then
+		local QBCore = exports['qb-core']:GetCoreObject()
+		local items = QBCore.Shared.Items
+
+		if items and table.type(items) ~= 'empty' then
+			local dump = {}
+			local count = 0
+			local ignoreList = {
+				"weapon_",
+				"pistol_",
+				"pistol50_",
+				"revolver_",
+				"smg_",
+				"combatpdw_",
+				"shotgun_",
+				"rifle_",
+				"carbine_",
+				"gusenberg_",
+				"sniper_",
+				"snipermax_",
+				"tint_",
+				"_ammo"
+			}
+
+			local function checkIgnoredNames(name)
+				for i = 1, #ignoreList do
+					if string.find(name, ignoreList[i]) then
+						return true
+					end
+				end
+				return false
+			end
+
+			for k, item in pairs(items) do
+				-- Explain why this wouldn't be table to me, because numerous people have been getting "attempted to index number" here
+				if type(item) == 'table' then
+					-- Some people don't assign the name property, but it seemingly always matches the index anyway.
+					if not item.name then item.name = k end
+
+					if not ItemList[item.name] and not checkIgnoredNames(item.name) then
+						item.close = item.shouldClose == nil and true or item.shouldClose
+						item.stack = not item.unique and true
+						item.description = item.description
+						item.weight = item.weight or 0
+						dump[k] = item
+						count += 1
+					end
+				end
+			end
+
+			if table.type(dump) ~= 'empty' then
+				local file = {string.strtrim(LoadResourceFile(shared.resource, 'data/items.lua'))}
+				file[1] = file[1]:gsub('}$', '')
+
+				---@todo separate into functions for reusability, properly handle nil values
+				local itemFormat = [[
+
+	[%q] = {
+		label = %q,
+		weight = %s,
+		stack = %s,
+		close = %s,
+		description = %q,
+		client = {
+			status = {
+				hunger = %s,
+				thirst = %s,
+				stress = %s
+			},
+			image = %q,
+		}
+	},
+]]
+
+				local fileSize = #file
+
+				for _, item in pairs(dump) do
+					if not ItemList[item.name] then
+						fileSize += 1
+
+						---@todo cry
+						local itemStr = itemFormat:format(item.name, item.label, item.weight, item.stack, item.close, item.description or 'nil', item.hunger or 'nil', item.thirst or 'nil', item.stress or 'nil', item.image or 'nil')
+						-- temporary solution for nil values
+						itemStr = itemStr:gsub('[%s]-[%w]+ = "?nil"?,?', '')
+						-- temporary solution for empty status table
+						itemStr = itemStr:gsub('[%s]-[%w]+ = %{[%s]+%},?', '')
+						-- temporary solution for empty client table
+						itemStr = itemStr:gsub('[%s]-[%w]+ = %{[%s]+%},?', '')
+						file[fileSize] = itemStr
+						ItemList[item.name] = item
+					end
+				end
+
+				file[fileSize+1] = '}'
+
+				SaveResourceFile(shared.resource, 'data/items.lua', table.concat(file), -1)
+				shared.info(count, 'items have been copied from the QBCore.Shared.Items.')
+				shared.info('You should restart the resource to load the new items.')
+			end
+		end
+
+		Wait(500)
+	end
+
+	local clearStashes = GetConvar('inventory:clearstashes', '6 MONTH')
+
+	if clearStashes ~= '' then
+		pcall(MySQL.query.await, ('DELETE FROM ox_inventory WHERE lastupdated < (NOW() - INTERVAL %s) OR data = "[]"'):format(clearStashes))
 	end
 
 	local count = 0
@@ -162,7 +272,7 @@ local TriggerEventHooks = require 'modules.hooks.server'
 
 ---@param inv inventory
 ---@param item OxServerItem
----@param metadata any
+---@param metadata table<string, any> | string | nil
 ---@param count number
 ---@return table, number
 ---Generates metadata for new items being created through AddItem, buyItem, etc.
@@ -181,8 +291,13 @@ function Items.Metadata(inv, item, metadata, count)
 
 		if metadata.registered ~= false and (metadata.ammo or item.name == 'WEAPON_STUNGUN') then
 			local registered = type(metadata.registered) == 'string' and metadata.registered or inv?.player?.name
-			metadata.registered = registered
-			metadata.serial = GenerateSerial(metadata.serial)
+
+			if registered then
+				metadata.registered = registered
+				metadata.serial = GenerateSerial(metadata.serial)
+			else
+				metadata.registered = nil
+			end
 		end
 
 		if item.hash == `WEAPON_PETROLCAN` or item.hash == `WEAPON_HAZARDCAN` or item.hash == `WEAPON_FERTILIZERCAN` or item.hash == `WEAPON_FIREEXTINGUISHER` then
@@ -257,7 +372,7 @@ function Items.CheckMetadata(metadata, item, name, ostime)
 	local durability = metadata.durability
 
 	if durability then
-		if durability < 0 or durability > 100 and ostime >= durability then
+		if durability > 100 and ostime >= durability then
 			metadata.durability = 0
 		end
 	else
@@ -299,43 +414,6 @@ function Items.CheckMetadata(metadata, item, name, ostime)
 	return metadata
 end
 
----Update item durability, and call `Inventory.RemoveItem` if it was removed from decay.
----@param inv OxInventory
----@param slot SlotWithItem
----@param item OxServerItem
----@param value? number
----@param ostime? number
----@return boolean? removed
-function Items.UpdateDurability(inv, slot, item, value, ostime)
-    local durability = slot.metadata.durability or value
-
-    if not durability then return end
-
-    if value then
-        durability = value
-    elseif ostime and durability > 100 and ostime >= durability then
-        durability = 0
-    end
-
-    if item.decay and durability == 0 then
-        return Inventory.RemoveItem(inv, slot.name, slot.count, nil, slot.slot)
-    end
-
-    if slot.metadata.durability == durability then return end
-
-    inv.changed = true
-    slot.metadata.durability = durability
-
-    inv:syncSlotsWithClients({
-        {
-            item = slot,
-            inventory = inv.id
-        }
-    }, true)
-end
-
----@deprecated
----Use the 'ox_inventory:usedItem' event or the 'usingItem' or 'buyItem' hooks
 local function Item(name, cb)
 	local item = ItemList[name]
 
@@ -364,7 +442,183 @@ end
 -- 		print(data.id, data.coords, json.encode(data.items[slot], {indent=true}))
 -- 	end
 -- end)
+Item('box_rancho_beer', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'rancho_beer', 6)
+	end
+end)
 
+Item('box_dusche_beer', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'dusche_beer', 6)
+	end
+end)
+
+Item('box_stronzo_beer', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'stronzo_beer', 6)
+	end
+end)
+
+Item('box_patriot_beer', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'patriot_beer', 6)
+	end
+end)
+-- Pizza Boxes
+Item('box_pizza_chs', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'pizza_chs', 8)
+	end
+end)
+
+Item('box_pizza_pep', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'pizza_pep', 8)
+	end
+end)
+
+Item('box_pizza_msh', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'pizza_msh', 8)
+	end
+end)
+
+Item('box_pizza_mgt', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'pizza_mgt', 8)
+	end
+end)
+
+Item('box_pizza_dmt', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'pizza_dmt', 8)
+	end
+end)
+
+----------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------- 
+-- Ammo
+Item('box_ammo_rifle1', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-rifle', 25)
+	end
+end)
+
+Item('box_ammo_rifle2', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-rifle2', 25)
+	end
+end)
+
+Item('box_ammo_shotgun', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-shotgun', 25)
+	end
+end)
+
+Item('box_ammo_sniper', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-sniper', 25)
+	end
+end)
+
+Item('box_ammo_50', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-50', 25)
+	end
+end)
+
+Item('box_ammo_45', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-45', 25)
+	end
+end)
+
+Item('box_ammo_9', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'ammo-9', 25)
+	end
+end)
+
+----------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------- 
+-- FOOD: Meal-ready-eat
+Item('mre_1', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'mre_beefstew', 1) -- meal
+		Inventory.AddItem(inventory, 'mre_tmsoup', 1) -- side
+		Inventory.AddItem(inventory, 'mre_bread', 2) -- bread
+		Inventory.AddItem(inventory, 'ps_qs', 1) -- dessert
+	end
+end)
+
+Item('mre_2', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'mre_chkenchilada', 1) -- meal
+		Inventory.AddItem(inventory, 'mre_corn', 1) -- side
+		Inventory.AddItem(inventory, 'mre_bread', 2) -- bread
+		Inventory.AddItem(inventory, 'ps_qs', 1) -- dessert
+	end
+end)
+
+Item('mre_3', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'mre_veggieomelet', 1) -- meal
+		Inventory.AddItem(inventory, 'mre_tmsoup', 1) -- side
+		Inventory.AddItem(inventory, 'mre_bread', 2) -- bread
+		Inventory.AddItem(inventory, 'ps_qs', 1) -- dessert
+	end
+end)
+
+Item('mre_4', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'mre_chilimac', 1) -- meal
+		Inventory.AddItem(inventory, 'mre_corn', 1) -- side
+		Inventory.AddItem(inventory, 'mre_bread', 2) -- bread
+		Inventory.AddItem(inventory, 'ps_qs', 1) -- dessert
+	end
+end)
+
+Item('mre_5', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'mre_chknking', 1) -- meal
+		Inventory.AddItem(inventory, 'mre_tmsoup', 1) -- side
+		Inventory.AddItem(inventory, 'mre_bread', 2) -- bread
+		Inventory.AddItem(inventory, 'ps_qs', 1) -- dessert
+	end
+end)
+
+Item('jakeleica', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'vringleica', 1) -- meal
+		Inventory.AddItem(inventory, 'vringjake', 1) -- side
+	end
+end)
+
+Item('trustvwelcome', function(event, item, inventory, data, slot)
+	if event == 'usedItem' then
+    	Inventory.AddItem(inventory, 'phone', 1) -- meal
+		Inventory.AddItem(inventory, 'battery', 5) -- side
+		Inventory.AddItem(inventory, 'doener', 5) -- bread
+		Inventory.AddItem(inventory, 'fr_fries', 5) -- dessert
+		Inventory.AddItem(inventory, 'cola', 5)
+	end
+end)
+
+-- TESTING for CIG
+--[[
+	replace lines 307-314 with this
+	
+	elseif item.name == 'garbage' then
+			local trashType = trash[math.random(1, #trash)]
+			metadata.image = trashType.image
+			metadata.weight = trashType.weight
+			metadata.description = trashType.description
+		elseif item.name == 'redwoods' then
+			metadata.weight = 25
+		end
+]]
 -----------------------------------------------------------------------------------------------
 
 return Items

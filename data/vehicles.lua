@@ -13,7 +13,7 @@ return {
 		[`bullet`] = 1,
 		[`cheetah`] = 1,
 		[`cyclone`] = 1,
-		[`voltic`] = 1,
+		[`voltic`] = 3,
 		[`reaper`] = 3,
 		[`entityxf`] = 1,
 		[`t20`] = 1,
@@ -30,9 +30,11 @@ return {
 		[`vagner`] = 1,
 		[`visione`] = 1,
 		[`prototipo`] = 1,
-		[`zentorno`] = 1,
+		[`zentorno`] = 3,
 		[`trophytruck`] = 0,
 		[`trophytruck2`] = 0,
+		[`drakkar`] = 1,
+		-- [`rallytruck`] = 1,
 	},
 
 	-- slots, maxWeight; default weight is 8000 per slot
@@ -58,7 +60,9 @@ return {
 		[19] = {11, 88000},		-- Military
 		[20] = {11, 88000},		-- Commercial (trucks)
 		models = {
-			[`xa21`] = {11, 88000}
+			[`xa21`] = {11, 88000},
+			[`drakkar`] = {11, 188000},
+			[`rallytruck`] = {11, 65000}
 		}
 	},
 
@@ -66,25 +70,47 @@ return {
 		[0] = {21, 168000},		-- Compact
 		[1] = {41, 328000},		-- Sedan
 		[2] = {51, 408000},		-- SUV
-		[3] = {31, 248000},		-- Coupe
+		[3] = {31, 448000},		-- Coupe
 		[4] = {41, 328000},		-- Muscle
-		[5] = {31, 248000},		-- Sports Classic
-		[6] = {31, 248000},		-- Sports
-		[7] = {21, 168000},		-- Super
+		[5] = {31, 348000},		-- Sports Classic
+		[6] = {31, 348000},		-- Sports
+		[7] = {21, 468000},		-- Super
 		[8] = {5, 40000},		-- Motorcycle
 		[9] = {51, 408000},		-- Offroad
 		[10] = {51, 408000},	-- Industrial
 		[11] = {41, 328000},	-- Utility
 		[12] = {61, 488000},	-- Van
-		-- [14] -- Boat
-		-- [15] -- Helicopter
-		-- [16] -- Plane
+		[14] = {61, 488000}, -- [14] -- Boat
+		[15] = {61, 888000},-- [15] -- Helicopter
+		[16] = {40, 1188000}, -- [16] -- Plane
 		[17] = {41, 328000},	-- Service
 		[18] = {41, 328000},	-- Emergency
 		[19] = {41, 328000},	-- Military
-		[20] = {61, 488000},	-- Commercial
+		[20] = {61, 1488000},	-- Commercial
 		models = {
-			[`xa21`] = {11, 10000}
+			[`xa21`] = {11, 10000},
+			[`swift`] = {51, 688000},
+			[`swift2`] = {61, 1288000},
+			[`supervolito`] = {41, 588000},
+			[`supervolito2`] = {51, 788000},
+			[`pounder`] = {160, 4888000},
+			[`mule`] = {110, 3688000},
+			[`mule2`] = {120, 3888000},
+			[`fmss`] = {140, 3088000},
+			[`tv63sga`] = {30, 668000},
+			[`tvrus`] = {30, 668000},
+			[`tvdhawk`] = {30, 668000},
+			[`huntley`] = {35, 768000},
+			[`benson`] = {80, 2808000},
+			[`rallytruck`] = {80, 2808000}
 		},
+		boneIndex = {
+			[`pounder`] = 'wheel_rr',
+			[`supervolito`] = 'wheel_rr',
+			[`supervolito2`] = 'wheel_rr',
+			[`swift`] = 'wheel_rr',
+			[`swift2`] = 'wheel_rr',
+			[`rallytruck`] = 'wheel_rr'
+		}
 	}
 }

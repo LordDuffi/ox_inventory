@@ -1,3 +1,5 @@
+local onLogout = ...
+
 local ESX = setmetatable({}, {
 	__index = function(self, index)
 		local obj = exports.es_extended:getSharedObject()
@@ -20,7 +22,7 @@ function client.setPlayerStatus(values)
 	end
 end
 
-RegisterNetEvent('esx:onPlayerLogout', client.onLogout)
+RegisterNetEvent('esx:onPlayerLogout', onLogout)
 
 AddEventHandler('esx:setPlayerData', function(key, value)
 	if not PlayerData.loaded or GetInvokingResource() ~= 'es_extended' then return end
@@ -38,7 +40,7 @@ local Weapon = require 'modules.weapon.client'
 
 RegisterNetEvent('esx_policejob:handcuff', function()
 	PlayerData.cuffed = not PlayerData.cuffed
-	LocalPlayer.state:set('invBusy', PlayerData.cuffed, true)
+	LocalPlayer.state:set('invBusy', PlayerData.cuffed, false)
 
 	if not PlayerData.cuffed then return end
 
@@ -47,5 +49,5 @@ end)
 
 RegisterNetEvent('esx_policejob:unrestrain', function()
 	PlayerData.cuffed = false
-	LocalPlayer.state:set('invBusy', PlayerData.cuffed, true)
+	LocalPlayer.state:set('invBusy', PlayerData.cuffed, false)
 end)

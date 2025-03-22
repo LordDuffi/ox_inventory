@@ -2,69 +2,31 @@ if not lib then return end
 
 local Items = require 'modules.items.shared' --[[@as table<string, OxClientItem>]]
 
-local function sendDisplayMetadata(data)
-    SendNUIMessage({
+local function displayMetadata(metadata, value)
+	local data = metadata
+	if type(metadata) == 'string' and value then data = { [metadata] = value } end
+	SendNUIMessage({
 		action = 'displayMetadata',
 		data = data
 	})
 end
-
---- use array of single key value pairs to dictate order
----@param metadata string | table<string, string> | table<string, string>[]
----@param value? string
-local function displayMetadata(metadata, value)
-	local data = {}
-
-	if type(metadata) == 'string' then
-        if not value then return end
-
-        data = { { metadata = metadata, value = value } }
-	elseif table.type(metadata) == 'array' then
-		for i = 1, #metadata do
-			for k, v in pairs(metadata[i]) do
-				data[i] = {
-					metadata = k,
-					value = v,
-				}
-			end
-		end
-	else
-		for k, v in pairs(metadata) do
-			data[#data + 1] = {
-				metadata = k,
-				value = v,
-			}
-		end
-	end
-
-    if client.uiLoaded then
-        return sendDisplayMetadata(data)
-    end
-
-    CreateThread(function()
-        repeat Wait(100) until client.uiLoaded
-
-        sendDisplayMetadata(data)
-    end)
-end
-
 exports('displayMetadata', displayMetadata)
 
 ---@param _ table?
 ---@param name string?
 ---@return table?
 local function getItem(_, name)
-    if not name then return Items end
+	if name then
+		name = name:lower()
 
-	if type(name) ~= 'string' then return end
+		if name:sub(0, 7) == 'weapon_' then
+			name = name:upper()
+		end
 
-    name = name:lower()
+		return Items[name]
+	end
 
-    if name:sub(0, 7) == 'weapon_' then
-        name = name:upper()
-    end
-
-    return Items[name]
+	return Items
 end
 
 setmetatable(Items --[[@as table]], {
@@ -94,7 +56,7 @@ Item('bandage', function(data, slot)
 	ox_inventory:useItem(data, function(data)
 		if data then
 			SetEntityHealth(cache.ped, math.min(maxHealth, math.floor(health + maxHealth / 16)))
-			lib.notify({ description = 'You feel better already' })
+			lib.notify({ description = 'Du fühlst dich schon besser' })
 		end
 	end)
 end)
@@ -120,7 +82,7 @@ Item('parachute', function(data, slot)
 				GiveWeaponToPed(cache.ped, chute, 0, true, false)
 				SetPedGadget(cache.ped, chute, true)
 				lib.requestModel(1269906701)
-				client.parachute = {CreateParachuteBagObject(cache.ped, true, true), slot?.metadata?.type or -1}
+				client.parachute = CreateParachuteBagObject(cache.ped, true, true)
 				if slot.metadata.type then
 					SetPlayerParachuteTintIndex(PlayerData.id, slot.metadata.type)
 				end
@@ -186,6 +148,193 @@ Item('clothing', function(data, slot)
 	end)
 end)
 
+-- RECREATIONAL
+Item('cigar', function(data, slot) -- Will lightly damage heath on use
+	local maxHealth = GetEntityMaxHealth(cache.ped)
+	local health = GetEntityHealth(cache.ped)
+	ox_inventory:useItem(data, function(data)
+		if data then
+			SetEntityHealth(cache.ped, math.min(maxHealth, math.floor(health - maxHealth / 32)))
+			lib.notify({ description = 'Du nimmst den Schlag wie ein Champion' })
+		end
+	end)
+end)
+
+Item('cigarette', function(data, slot) -- Will lightly damage heath on use
+	local maxHealth = GetEntityMaxHealth(cache.ped)
+	local health = GetEntityHealth(cache.ped)
+	ox_inventory:useItem(data, function(data)
+		if data then
+			SetEntityHealth(cache.ped, math.min(maxHealth, math.floor(health - maxHealth / 64)))
+			lib.notify({ description = 'Du nimmst den Schlag wie ein Champion' })
+		end
+	end)
+end)
+
+Item('vape', function(data, slot) -- Will lightly damage heath on use
+	local maxHealth = GetEntityMaxHealth(cache.ped)
+	local health = GetEntityHealth(cache.ped)
+	ox_inventory:useItem(data, function(data)
+		if data then
+			SetEntityHealth(cache.ped, math.min(maxHealth, math.floor(health - maxHealth / 128)))
+			lib.notify({ description = 'Du nimmst den Schlag wie ein Champion' })
+		end
+	end)
+end)
+
+Item('clothing_bag', function(data, slot) -- opens burner phone menu 
+	ox_inventory:useItem(data, function(data)
+		TriggerEvent('ox_appearance:wardrobe')
+	end)
+end)
+
+-- BODY ARMOR
+
+
+Item('bodyarmor_1', function(data, slot) -- Adds 30% of body armor
+	if GetPedArmour(cache.ped) < 100 then
+		ox_inventory:useItem(data, function(data)
+			if data then
+				SetPlayerMaxArmour(PlayerData.id, 100)
+				SetPedArmour(cache.ped, 30)
+			end
+		end)
+	end
+end)
+
+Item('bodyarmor_2', function(data, slot) -- Adds 60% of body armor
+	if GetPedArmour(cache.ped) < 100 then
+		ox_inventory:useItem(data, function(data)
+			if data then
+				SetPlayerMaxArmour(PlayerData.id, 100)
+				SetPedArmour(cache.ped, 60)
+			end
+		end)
+	end
+end)
+
+Item('bodyarmor_3', function(data, slot) -- Adds 100% of body armor
+	if GetPedArmour(cache.ped) < 100 then
+		ox_inventory:useItem(data, function(data)
+			if data then
+				SetPlayerMaxArmour(PlayerData.id, 100)
+				SetPedArmour(cache.ped, 100)
+			end
+		end)
+	end
+end)
+
+
+-- DRUG EFFECTS
+
+
+Item('weed_sativa', function(data, slot) -- causes drug effect
+	ox_inventory:useItem(data, function(data)
+		if data then
+			SetTimecycleModifier("spectator6")
+			AnimpostfxPlay("DrugsMichaelAliensFight", 10000001, true)
+    		ShakeGameplayCam("DRUNK_SHAKE", 0.6)
+
+			Citizen.Wait(90000) -- 60 seconds
+
+			AnimpostfxStopAll()
+    		ShakeGameplayCam("DRUNK_SHAKE", 0.0)
+			SetTimecycleModifierStrength(0.0)
+		end
+	end)
+end)
+
+Item('weed_indica', function(data, slot) -- causes drug effect
+	ox_inventory:useItem(data, function(data)
+		if data then
+			SetTimecycleModifier("spectator2")
+			AnimpostfxPlay("HeistCelebPass", 10000001, true)
+    		ShakeGameplayCam("DRUNK_SHAKE", 0.6)
+
+			Citizen.Wait(90000) -- 60 seconds
+
+			AnimpostfxStopAll()
+    		ShakeGameplayCam("DRUNK_SHAKE", 0.0)
+			SetTimecycleModifierStrength(0.0)
+		end
+	end)
+end)
+
+Item('weed_hybrid', function(data, slot) -- causes drug effect 
+	ox_inventory:useItem(data, function(data)
+		if data then
+			SetTimecycleModifier("spectator2")
+			AnimpostfxPlay("DrugsTrevorClownsFight", 10000001, true)
+    		ShakeGameplayCam("DRUNK_SHAKE", 0.6)
+
+			Citizen.Wait(90000) -- 60 seconds
+
+			AnimpostfxStopAll()
+    		ShakeGameplayCam("DRUNK_SHAKE", 0.0)
+			SetTimecycleModifierStrength(0.0)
+		end
+	end)
+end)
+
+
+-- POLICE BADGES
+
+
+Item('badge_fib', function(data, slot) -- Adds 100% of body armor
+	local pos = GetEntityCoords(GetPlayerPed(-1))
+    local rped = GetRandomPedAtCoord(pos['x'], pos['y'], pos['z'], 20.05, 20.05, 20.05, 6, _r)
+	ox_inventory:useItem(data, function(data)
+		if DoesEntityExist(rped) then
+            TaskReactAndFleePed(rped, PlayerPedId())
+        end
+	end)
+end)
+
+Item('badge_lspd', function(data, slot) -- Adds 100% of body armor
+	local pos = GetEntityCoords(GetPlayerPed(-1))
+    local rped = GetRandomPedAtCoord(pos['x'], pos['y'], pos['z'], 20.05, 20.05, 20.05, 6, _r)
+	ox_inventory:useItem(data, function(data)
+		if DoesEntityExist(rped) then
+            TaskReactAndFleePed(rped, PlayerPedId())
+        end
+	end)
+end)
+
+Item('badge_bcso', function(data, slot) -- Adds 100% of body armor
+	local pos = GetEntityCoords(GetPlayerPed(-1))
+    local rped = GetRandomPedAtCoord(pos['x'], pos['y'], pos['z'], 20.05, 20.05, 20.05, 6, _r)
+	ox_inventory:useItem(data, function(data)
+		if DoesEntityExist(rped) then
+            TaskReactAndFleePed(rped, PlayerPedId())
+        end
+	end)
+end)
+
+Item('badge_lssd', function(data, slot) -- Adds 100% of body armor
+	local pos = GetEntityCoords(GetPlayerPed(-1))
+    local rped = GetRandomPedAtCoord(pos['x'], pos['y'], pos['z'], 20.05, 20.05, 20.05, 6, _r)
+	ox_inventory:useItem(data, function(data)
+		if DoesEntityExist(rped) then
+            TaskReactAndFleePed(rped, PlayerPedId())
+        end
+	end)
+end)
+
+Item('phone_burner', function(data, slot) -- opens burner phone menu 
+	ox_inventory:useItem(data, function(data)
+		-- part of dark web script: work in progress
+		--exports['MI_Darkweb']:midarkweb_client_openwebmenu()
+	end)
+end)
+
+-- TESTING CIG
+Item('redwoods', function(data, slot)
+    ox_inventory:useItem(data, function(data)
+        if data then
+            TriggerServerEvent('invsup:server:item:smoke_cig', data, {indent=true})
+        end
+    end)
+end)
 -----------------------------------------------------------------------------------------------
 
 exports('Items', function(item) return getItem(nil, item) end)

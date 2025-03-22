@@ -1,26 +1,5 @@
 return {
 	Weapons = {
-		['WEAPON_BATTLERIFLE'] = {
-			label = 'Battle Rifle',
-			weight = 3300,
-			durability = 0.03,
-			ammoname = 'ammo-rifle2',
-		},
-
-		['WEAPON_SNOWLAUNCHER'] = {
-			label = 'Snowball Launcher',
-			weight = 1000,
-			durability = 0.03,
-			ammoname = 'WEAPON_SNOWBALL',
-		},
-
-		['WEAPON_TECPISTOL'] = {
-			label = 'Tactical SMG',
-			weight = 1500,
-			durability = 0.075,
-			ammoname = 'ammo-9',
-		},
-
 		['WEAPON_ADVANCEDRIFLE'] = {
 			label = 'Advanced Rifle',
 			weight = 3100,
@@ -70,19 +49,19 @@ return {
 		},
 
 		['WEAPON_BAT'] = {
-			label = 'Bat',
+			label = 'Baseballschläger',
 			weight = 1134,
 			durability = 0.1,
 		},
 
 		['WEAPON_BATTLEAXE'] = {
-			label = 'Battle Axe',
+			label = 'Streitaxt',
 			weight = 6500,
 			durability = 0.1,
 		},
 
 		['WEAPON_BOTTLE'] = {
-			label = 'Bottle',
+			label = 'Falsche',
 			weight = 350,
 			durability = 0.1,
 		},
@@ -192,7 +171,7 @@ return {
 		},
 
 		['WEAPON_CROWBAR'] = {
-			label = 'Crowbar',
+			label = 'Brechstange',
 			weight = 2500,
 			durability = 0.1,
 		},
@@ -227,7 +206,6 @@ return {
 		['WEAPON_FIREEXTINGUISHER'] = {
 			label = 'Fire Extinguisher',
 			weight = 8616,
-            durability = 0.006
 		},
 
 		['WEAPON_FIREWORK'] = {
@@ -244,14 +222,14 @@ return {
 		},
 
 		['WEAPON_FLAREGUN'] = {
-			label = 'Flare Gun',
+			label = 'Leuchtpistole',
 			weight = 1000,
 			durability = 0.5,
 			ammoname = 'ammo-flare'
 		},
 
 		['WEAPON_FLASHLIGHT'] = {
-			label = 'Flashlight',
+			label = 'Taschenlampe',
 			weight = 125,
 			durability = 0.1,
 		},
@@ -263,13 +241,13 @@ return {
 		},
 
 		['WEAPON_GRENADE'] = {
-			label = 'Grenade',
+			label = 'Granate',
 			weight = 400,
 			throwable = true,
 		},
 
 		['WEAPON_GRENADELAUNCHER'] = {
-			label = 'Grenade Launcher',
+			label = 'Granatwerfer',
 			weight = 6500,
 			durability = 0.05,
 			ammoname = 'ammo-grenade'
@@ -338,21 +316,21 @@ return {
 		},
 
 		['WEAPON_HEAVYSNIPER'] = {
-			label = 'Heavy Sniper',
-			weight = 12700,
+			label = 'Schweres Scharfschützengewehr',
+			weight = 2700,
 			durability = 0.5,
 			ammoname = 'ammo-heavysniper'
 		},
 
 		['WEAPON_HEAVYSNIPER_MK2'] = {
-			label = 'Heavy Sniper MK2',
-			weight = 14000,
+			label = 'Schweres Scharfschützengewehr MK2',
+			weight = 4000,
 			durability = 0.5,
 			ammoname = 'ammo-heavysniper'
 		},
 
 		['WEAPON_KNIFE'] = {
-			label = 'Knife',
+			label = 'Messer',
 			weight = 300,
 			durability = 0.1,
 		},
@@ -433,7 +411,7 @@ return {
 		},
 
 		['WEAPON_MOLOTOV'] = {
-			label = 'Molotov',
+			label = 'Molotow',
 			weight = 1800,
 			throwable = true,
 		},
@@ -453,14 +431,14 @@ return {
 		},
 
 		['WEAPON_NIGHTSTICK'] = {
-			label = 'Nightstick',
+			label = 'Schlagstock',
 			weight = 1000,
 			durability = 0.1,
 		},
 
 		['WEAPON_PETROLCAN'] = {
-			label = 'Jerry Can',
-			weight = 4000,
+			label = 'Benzinkanister',
+			weight = 12000,
 		},
 
 		['WEAPON_GADGETPISTOL'] = {
@@ -477,7 +455,7 @@ return {
 		},
 
 		['WEAPON_PISTOL'] = {
-			label = 'Pistol',
+			label = 'Pistole',
 			weight = 1130,
 			durability = 0.1,
 			ammoname = 'ammo-9',
@@ -485,7 +463,7 @@ return {
 
 		['WEAPON_PISTOL50'] = {
 			label = 'Pistol .50',
-			weight = 2000,
+			weight = 650,
 			durability = 0.1,
 			ammoname = 'ammo-50'
 		},
@@ -498,19 +476,19 @@ return {
 		},
 
 		['WEAPON_POOLCUE'] = {
-			label = 'Pool Cue',
+			label = 'Billardqueue',
 			weight = 146,
 			durability = 0.1,
 		},
 
 		['WEAPON_CANDYCANE'] = {
-			label = 'Candy Cane',
+			label = 'Zuckerstange',
 			weight = 85,
 			durability = 0.1,
 		},
 
 		['WEAPON_PROXMINE'] = {
-			label = 'Proximity Mine',
+			label = 'Annäherungsminen',
 			weight = 2500,
 			throwable = true,
 		},
@@ -599,20 +577,20 @@ return {
 		},
 
 		['WEAPON_SMOKEGRENADE'] = {
-			label = 'Smoke Grenade',
+			label = 'Rauchgranate',
 			weight = 600,
 			throwable = true,
 		},
 
 		['WEAPON_SNIPERRIFLE'] = {
-			label = 'Sniper Rifle',
+			label = 'Scharfschützengewehr',
 			weight = 5000,
 			durability = 0.5,
 			ammoname = 'ammo-sniper'
 		},
 
 		['WEAPON_SNOWBALL'] = {
-			label = 'Snow Ball',
+			label = 'Schneeball',
 			weight = 5,
 			throwable = true,
 		},
@@ -646,7 +624,7 @@ return {
 		},
 
 		['WEAPON_STICKYBOMB'] = {
-			label = 'Sticky Bomb',
+			label = 'Haftbombe',
 			weight = 1000,
 			throwable = true,
 		},
@@ -670,6 +648,12 @@ return {
 			ammoname = 'ammo-shotgun'
 		},
 
+		['WEAPON_ACIDPACKAGE'] = {
+			label = 'Zeitung',
+			 weight = 36,
+			 throwable = true,
+	    },
+
 		['WEAPON_SWITCHBLADE'] = {
 			label = 'Switchblade',
 			weight = 300,
@@ -692,7 +676,7 @@ return {
 		},
 
 		['WEAPON_WRENCH'] = {
-			label = 'Wrench',
+			label = 'Schraubenschlüssel',
 			weight = 2500,
 			durability = 0.1,
 		},
@@ -712,7 +696,7 @@ return {
 		},
 
 		['WEAPON_TEARGAS'] = {
-			label = 'Tear Gas',
+			label = 'Tränengas',
 			weight = 600,
 			throwable = true,
 		},
@@ -740,7 +724,6 @@ return {
 			weight = 280,
 			type = 'muzzle',
 			client = {
-                image = 'at_suppressor.png',
 				component = {
 					`COMPONENT_AT_PI_SUPP`,
 					`COMPONENT_AT_PI_SUPP_02`,
@@ -756,12 +739,11 @@ return {
 			weight = 280,
 			type = 'muzzle',
 			client = {
-                image = 'at_suppressor.png',
 				component = {
 					`COMPONENT_AT_AR_SUPP`,
 					`COMPONENT_AT_AR_SUPP_02`,
 					`COMPONENT_AT_SR_SUPP`,
-					`COMPONENT_AT_SR_SUPP_03`,
+					`COMPONENT_AT_SR_SUPP_03`
 				},
 				usetime = 2500
 			}
@@ -804,7 +786,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_extended.png',
 				component = {
 					`COMPONENT_APPISTOL_CLIP_02`,
 					`COMPONENT_CERAMICPISTOL_CLIP_02`,
@@ -816,7 +797,6 @@ return {
 					`COMPONENT_SNSPISTOL_CLIP_02`,
 					`COMPONENT_SNSPISTOL_MK2_CLIP_02`,
 					`COMPONENT_VINTAGEPISTOL_CLIP_02`,
-                    `COMPONENT_TECPISTOL_CLIP_02`,
 				},
 				usetime = 2500
 			}
@@ -827,7 +807,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_extended.png',
 				component = {
 					`COMPONENT_ASSAULTSMG_CLIP_02`,
 					`COMPONENT_COMBATPDW_CLIP_02`,
@@ -846,7 +825,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_extended2.png',
 				component = {
 					`COMPONENT_ASSAULTSHOTGUN_CLIP_02`,
 					`COMPONENT_HEAVYSHOTGUN_CLIP_02`,
@@ -860,7 +838,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_extended2.png',
 				component = {
 					`COMPONENT_ADVANCEDRIFLE_CLIP_02`,
 					`COMPONENT_ASSAULTRIFLE_CLIP_02`,
@@ -875,7 +852,6 @@ return {
 					`COMPONENT_SPECIALCARBINE_CLIP_02`,
 					`COMPONENT_SPECIALCARBINE_MK2_CLIP_02`,
 					`COMPONENT_TACTICALRIFLE_CLIP_02`,
-					`COMPONENT_BATTLERIFLE_CLIP_02`,
 				},
 				usetime = 2500
 			}
@@ -886,7 +862,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_drum.png',
 				component = {
 					`COMPONENT_GUSENBERG_CLIP_02`,
 					`COMPONENT_MG_CLIP_02`,
@@ -902,7 +877,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_extended2.png',
 				component = {
 					`COMPONENT_HEAVYSNIPER_MK2_CLIP_02`,
 					`COMPONENT_MARKSMANRIFLE_CLIP_02`,
@@ -917,7 +891,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_drum.png',
 				component = {
 					`COMPONENT_COMBATPDW_CLIP_03`,
 					`COMPONENT_MACHINEPISTOL_CLIP_03`,
@@ -932,7 +905,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_drum.png',
 				component = {
 					`COMPONENT_HEAVYSHOTGUN_CLIP_03`
 				},
@@ -945,7 +917,6 @@ return {
 			type = 'magazine',
 			weight = 280,
 			client = {
-                image = 'at_clip_drum.png',
 				component = {
 					`COMPONENT_ASSAULTRIFLE_CLIP_03`,
 					`COMPONENT_COMPACTRIFLE_CLIP_03`,
@@ -1351,126 +1322,6 @@ return {
 			client = {
 				component = {
 					`COMPONENT_KNUCKLE_VARMOD_VAGOS`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_blagueurs'] = {
-			label = 'Blagueurs Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_splatter'] = {
-			label = 'Splatter Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_01`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_bulletholes'] = {
-			label = 'Bullet Holes Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_02`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_burgershot'] = {
-			label = 'Burger Shot Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_03`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_cluckinbell'] = {
-			label = 'Cluckin Bell Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_04`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_fatalincursion'] = {
-			label = 'Fatal Incursion Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_05`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_luchalibre'] = {
-			label = 'Lucha Libre Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_06`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_trippy'] = {
-			label = 'Trippy Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_07`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_tiedye'] = {
-			label = 'Tie-Dye Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_08`
-				},
-				usetime = 2500
-			}
-		},
-
-		['at_skin_wall'] = {
-			label = 'Wall Weapon Kit',
-			type = 'skin',
-			weight = 50,
-			client = {
-				component = {
-					`COMPONENT_BAT_VARMOD_XM3_09`
 				},
 				usetime = 2500
 			}
