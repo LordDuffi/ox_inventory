@@ -84,5 +84,7 @@
   "dumpster": "Çöplük",
   "crafting_item": "Üretılıyor %s",
   "crafting_bench": "Üretim Tezgahı",
-  "not_enough_durability": "%s Yeterli dayanıklılığa sahip değil"
+  "open_crafting_bench": "Üretim Tezgahını Aç",
+  "not_enough_durability": "%s Yeterli dayanıklılığa sahip değil",
+  "storage": "Depo"
 }
